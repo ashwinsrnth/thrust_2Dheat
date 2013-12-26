@@ -24,7 +24,7 @@
 // kernel to update temperatures - CPU version
 void step_kernel_cpu(int ni, 
                      int nj,
-                     float tfac, 
+                     float tfac,     
                      float *temp_in,
                      float *temp_out) {
     int i, j, i00, im10, ip10, i0m1, i0p1;

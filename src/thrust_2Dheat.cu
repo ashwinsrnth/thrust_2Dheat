@@ -6,17 +6,21 @@
 #include <thrust/tuple.h>
 #include <thrust/device_vector.h>
 #include <thrust/sequence.h>
+#include <thrust/device_ptr.h>
+#include <thrust/host_vector.h>
+
 #include <iomanip>
 #include <typeinfo>
+#include <time.h>
+
 #include <tiled.h>
 #include <printmatrix.hpp>
+#include <init.cu>
 
-# define L_x 1024
-# define L_y 1024
+# define L_x 1
+# define L_y 1
 # define N_x 1024
 # define N_y 1024
-# define TO1D(x, y, ncols) (((x)*(ncols)) + (y))
-
 
 struct temperature_update_functor{
 
@@ -39,17 +43,21 @@ public:
     }
 };
 
+
+
 int main(){
 
     double  dx = (double)L_x/N_x,
             dy = (double)L_y/N_y,
-            alpha = 0.01,
+            alpha = 0.2,
             dt = 1;
 
-    // Initialize temperatures and stencil
-    thrust::device_vector<double> A(N_x*N_y, 1);
-    A[N_x*5] = 20.0;
+    int nsteps = 10000;
 
+    clock_t startclock, stopclock;
+    double timeperstep;
+
+    thrust::device_vector<double> A= init_temp(N_x, N_y);
 
     thrust::device_vector<int> stencil(N_x, 1);
     std::cout<<typeid(stencil).name()<<std::endl;
@@ -62,8 +70,10 @@ int main(){
 
     StencilIterator repeated_stencil(stencil.begin(), stencil.end(), N_x-1);
 
+    startclock = clock();
+
     // Update temperatures 
-    for(int t=0; t<10000; t+=dt){
+    for(int t=0; t<nsteps; t+=dt){
         DoubleIterator s1 = A.begin()+N_y;
         DoubleIterator s2 = A.begin()+N_y - N_y;
         DoubleIterator s3 = A.begin()+N_y - 1;
@@ -80,10 +90,19 @@ int main(){
 
         thrust::for_each(zip, zip+N_y*N_x-2*N_x, 
                         temperature_update_functor(dx, dy, dt, alpha));
-
         
     }
 
+    stopclock = clock();
+    timeperstep =((double)(stopclock-startclock))/CLOCKS_PER_SEC;
+    timeperstep = timeperstep / nsteps;
+    timeperstep = timeperstep / (N_x*N_y);
+
+    printf("Time per point per step = %e\n",timeperstep);
+
+
+    thrust::host_vector<double> A_h = A;
+    write_to_file(A_h.data(), N_y, N_x);
 
     return 0;
 }

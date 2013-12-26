@@ -1,5 +1,6 @@
 # include <iostream>
 # include <iomanip>
+# include <fstream>
 
 # define TO1D(x, y, ncols) (((x)*(ncols)) + (y))
 
@@ -14,3 +15,17 @@ void printmatrix (Type& A, int N_i, int N_j){
     }
     std::cout << std::endl;
 } 
+
+template <typename T>
+void write_to_file(T* ary, int m, int n){
+    int i, j;
+    int ix;
+    std::ofstream output("../results/output.txt");
+    for(i=0; i<m; i++){
+        for(j=0; j<n; j++){
+            ix = TO1D(i, j, n);
+            output << ary[ix] << ", ";
+        }
+    output << std::endl;
+    }
+}
