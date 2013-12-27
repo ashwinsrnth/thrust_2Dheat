@@ -73,11 +73,11 @@ int main(){
     startclock = clock();
     
     for(int t=0; t<nsteps; t+=dt){
-        DoubleIterator s1 = A.begin()+N_y;
-        DoubleIterator s2 = A.begin()+N_y - N_y;
-        DoubleIterator s3 = A.begin()+N_y - 1;
-        DoubleIterator s4 = A.begin()+N_y + 1;
-        DoubleIterator s5 = A.begin()+N_y + N_y;
+        DoubleIterator s1 = A.begin()+N_x;
+        DoubleIterator s2 = A.begin()+N_x - N_x;
+        DoubleIterator s3 = A.begin()+N_x - 1;
+        DoubleIterator s4 = A.begin()+N_x + 1;
+        DoubleIterator s5 = A.begin()+N_x + N_x;
 
         typedef thrust::tuple<DoubleIterator, DoubleIterator, DoubleIterator, 
                               DoubleIterator, DoubleIterator, 
