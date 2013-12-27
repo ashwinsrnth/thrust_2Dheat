@@ -24,11 +24,11 @@
 // kernel to update temperatures - CPU version
 void step_kernel_cpu(int ni, 
                      int nj,
-                     float tfac,     
-                     float *temp_in,
-                     float *temp_out) {
+                     double tfac,     
+                     double *temp_in,
+                     double *temp_out) {
     int i, j, i00, im10, ip10, i0m1, i0p1;
-    float d2tdx2, d2tdy2;
+    double d2tdx2, d2tdy2;
 
     // loop over all points in domain (not boundary points)
     for (j=1; j < nj-1; j++) {
@@ -53,12 +53,12 @@ void step_kernel_cpu(int ni,
 // kernel to update temperatures - GPU version (not using shared mem)
 __global__ void step_kernel_gpu(int ni, 
                                 int nj,
-                                float tfac,
-                                float *temp_in,
-                                float *temp_out) 
+                                double tfac,
+                                double *temp_in,
+                                double *temp_out) 
 {
     int i, j, ti, tj, i00, im10, ip10, i0m1, i0p1;
-    float d2tdx2, d2tdy2;
+    double d2tdx2, d2tdy2;
 
     // find i and j indices of this thread
     ti = threadIdx.x;
@@ -88,14 +88,14 @@ __global__ void step_kernel_gpu(int ni,
 // kernel to update temperatures - GPU version (using shared mem)
 __global__ void step_kernel_gpu_shared(int ni, 
                                        int nj,
-                                       float tfac,
-                                       float *temp_in,
-                                       float *temp_out) 
+                                       double tfac,
+                                       double *temp_in,
+                                       double *temp_out) 
 {
     int i, j, ti, tj, i2d;
     // allocate an array in shared memory
-    __shared__ float temp[NI_TILE][NJ_TILE];
-    float d2tdx2, d2tdy2;
+    __shared__ double temp[NI_TILE][NJ_TILE];
+    double d2tdx2, d2tdy2;
     
     // find i and j indices of current thread
     ti = threadIdx.x;
@@ -135,18 +135,18 @@ __global__ void step_kernel_gpu_shared(int ni,
 // kernel to update temperatures - GPU version (using shared mem_v2)
 __global__ void step_kernel_gpu_shared_v2(int ni, 
 					  int nj,
-					  float tfac,
-					  float *temp_in,
-					  float *temp_out) 
+					  double tfac,
+					  double *temp_in,
+					  double *temp_out) 
 {
     int i, j, ti, tj, i00, i0m1, i0p1, ntot, j_iter;
     int j_sh, jm1_sh, jp1_sh, tmp_sh;
 
-    float d2tdx2, d2tdy2;
+    double d2tdx2, d2tdy2;
     bool compute_i;
 
     // allocate an array in shared memory
-    __shared__ float temp[NI_TILE][3];
+    __shared__ double temp[NI_TILE][3];
     
     // find i and j indices of current thread
     ti = threadIdx.x;
@@ -219,9 +219,9 @@ __global__ void step_kernel_gpu_shared_v2(int ni,
 int main(int argc, char *argv[]) 
 {
     int ni, nj, nstep;
-    float tfac, *temp1_h, *temp2_h,  *temp1_d, *temp2_d, *temp_tmp;
+    double tfac, *temp1_h, *temp2_h,  *temp1_d, *temp2_d, *temp_tmp;
     int i, j, i2d, istep;
-    float temp_bl, temp_br, temp_tl, temp_tr;
+    double temp_bl, temp_br, temp_tl, temp_tr;
     dim3 grid_dim, block_dim;
     clock_t startclock, stopclock;
     double timeperstep;
@@ -231,10 +231,15 @@ int main(int argc, char *argv[])
     ni = 1024;
     nj = 1024;
     nstep = 10000;
-    
+
+    if (argc == 3){             // Override definitions for N_x, N_y
+        double ni = argv[1];
+        double nj = argv[2];
+    }
+
     // allocate temperature array on host
-    temp1_h = (float *)malloc(sizeof(float)*ni*nj);
-    temp2_h = (float *)malloc(sizeof(float)*ni*nj);
+    temp1_h = (double *)malloc(sizeof(double)*ni*nj);
+    temp2_h = (double *)malloc(sizeof(double)*ni*nj);
 
     // initial temperature in interior
     for (j=1; j < nj-1; j++) {
@@ -255,37 +260,37 @@ int main(int argc, char *argv[])
         // bottom
         j = 0;
         i2d = i + ni*j;
-        temp1_h[i2d] = temp_bl + (temp_br-temp_bl)*(float)i/(float)(ni-1);
+        temp1_h[i2d] = temp_bl + (temp_br-temp_bl)*(double)i/(double)(ni-1);
 
         // top
         j = nj-1;
         i2d = i + ni*j;
-        temp1_h[i2d] = temp_tl + (temp_tr-temp_tl)*(float)i/(float)(ni-1);
+        temp1_h[i2d] = temp_tl + (temp_tr-temp_tl)*(double)i/(double)(ni-1);
     }
 
     for (j=0; j < nj; j++) {
         // left
         i = 0;
         i2d = i + ni*j;
-        temp1_h[i2d] = temp_bl + (temp_tl-temp_bl)*(float)j/(float)(nj-1);
+        temp1_h[i2d] = temp_bl + (temp_tl-temp_bl)*(double)j/(double)(nj-1);
 
         // right
         i = ni-1;
         i2d = i + ni*j;
-        temp1_h[i2d] = temp_br + (temp_tr-temp_br)*(float)j/(float)(nj-1);
+        temp1_h[i2d] = temp_br + (temp_tr-temp_br)*(double)j/(double)(nj-1);
     }
 
     // duplicate temeperature array on host
-    memcpy(temp2_h, temp1_h, sizeof(float)*ni*nj);
+    memcpy(temp2_h, temp1_h, sizeof(double)*ni*nj);
         
     // allocate temperature arrays on device
-    cudaMalloc((void **)&temp1_d, sizeof(float)*ni*nj);
-    cudaMalloc((void **)&temp2_d, sizeof(float)*ni*nj);
+    cudaMalloc((void **)&temp1_d, sizeof(double)*ni*nj);
+    cudaMalloc((void **)&temp2_d, sizeof(double)*ni*nj);
 
     // transfer temperature array from host to device
-    cudaMemcpy((void *)temp1_d, (void *)temp1_h, sizeof(float)*ni*nj,
+    cudaMemcpy((void *)temp1_d, (void *)temp1_h, sizeof(double)*ni*nj,
                cudaMemcpyHostToDevice);
-    cudaMemcpy((void *)temp2_d, (void *)temp1_h, sizeof(float)*ni*nj,
+    cudaMemcpy((void *)temp2_d, (void *)temp1_h, sizeof(double)*ni*nj,
                cudaMemcpyHostToDevice);
     
 
@@ -366,12 +371,12 @@ int main(int argc, char *argv[])
 
     // copy temperature array from device to host
     if (USE_CPU == 0) {
-        cudaMemcpy((void *)temp1_h, (void *)temp1_d, sizeof(float)*ni*nj,
+        cudaMemcpy((void *)temp1_h, (void *)temp1_d, sizeof(double)*ni*nj,
                    cudaMemcpyDeviceToHost);
     }
     
     // output temp1 to a file
-    fp = fopen("out.dat", "w");
+    fp = fopen("../results/out.dat", "w");
     fprintf(fp, "%i %i\n", ni, nj);
     for (j=0; j < nj; j++) {
         for (i=0; i < ni; i++) {

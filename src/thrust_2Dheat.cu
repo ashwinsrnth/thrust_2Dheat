@@ -17,10 +17,6 @@
 #include <printmatrix.hpp>
 #include <init.cu>
 
-# define L_x 1024
-# define L_y 1024
-# define N_x 1024
-# define N_y 1024
 
 struct temperature_update_functor{
 
@@ -44,7 +40,20 @@ public:
 };
 
 
-int main(){
+int main(int argc, char* argv[]){
+
+    double  L_x = 1024,
+            L_y = 1024,
+            N_x = 1024,
+            N_y = 1024;
+
+    // Read N_x, N_y from command line. If none provided
+    // then taken from definition above.
+
+    if (argc == 3){             // Override definitions for N_x, N_y
+        double N_x = argv[1];
+        double N_y = argv[2];
+    }
 
     double  dx = (double)L_x/N_x,
             dy = (double)L_y/N_y,
