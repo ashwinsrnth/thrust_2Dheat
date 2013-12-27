@@ -37,7 +37,7 @@ a 6-by-6 grid would look like this:
                         0 1 1 1 1 0
                         0 0 0 0 0 0
 
-To avoid storing the stencil, we create a cyclic_iterator that 
-iterates repeatedly over [0 1 1 1 1 0]. Of course, we start traversing
+To avoid storing the stencil, we create a tiled_iterator that 
+iterates cyclically over [0 1 1 1 1 0]. Of course, we start traversing
 the grid at the second row and stop at the (N_y - 1)th row.
 

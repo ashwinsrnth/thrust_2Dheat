@@ -37,8 +37,8 @@ public:
         if(thrust::get<5>(t)){
             thrust::get<0>(t) += 
             (alpha*dt)*
-            ((1/dy)*(thrust::get<1>(t)-2*thrust::get<0>(t)+thrust::get<4>(t))+
-            (1/dx)*(thrust::get<2>(t)-2*thrust::get<0>(t)+thrust::get<3>(t))); 
+            ((1/(dy*dy))*(thrust::get<1>(t)-2*thrust::get<0>(t)+thrust::get<4>(t))+
+            (1/(dx*dx))*(thrust::get<2>(t)-2*thrust::get<0>(t)+thrust::get<3>(t))); 
         }
     }
 };
