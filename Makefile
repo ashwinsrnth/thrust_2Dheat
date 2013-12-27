@@ -1,3 +1,6 @@
+# A terrible Makefile, as I don't quite know my way around these
+# yet:
+
 thrust_2Dheat : obj/thrust_2Dheat.o
 	nvcc -o bin/thrust_2Dheat.bin obj/thrust_2Dheat.o
 

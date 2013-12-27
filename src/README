@@ -1,0 +1,43 @@
+Files:
+------
+
+thrust_2Dheat.cu    :   Finite difference solution to the 2-D heat conduction 
+                        equation using Thrust.
+
+cam_2Dheat.cu       :   CPU/CUDA implementation by many-core group.
+                        Included for comparison and validation.
+                        @ Cambridge University. 
+
+                        Website: http://www.many-core.group.cam.ac.uk/
+
+init.cu             :   Initial conditions (taken from cam_2Dheat.cu)
+
+
+
+Notes on implementation:
+------------------------
+
+Essentially, the finite-difference stencil for each point in the 2-D
+domain consists of five points, the point itself, and its four
+nearest neighbours. We construct a tuple of five iterators for 
+each of the points and "zip" them into a zip_iterator. Then, using the 
+thrust::for_each function, we apply the temperature_update_functor to 
+each point.
+
+The temperature_update_functor needs to know which points lie on the
+boundary, as no update must be performed on these points. A binary
+stencil is used to describe the boundaries. In 2-D, the stencil for 
+a 6-by-6 grid would look like this:
+
+
+                        0 0 0 0 0 0
+                        0 1 1 1 1 0
+                        0 1 1 1 1 0
+                        0 1 1 1 1 0
+                        0 1 1 1 1 0
+                        0 0 0 0 0 0
+
+To avoid storing the stencil, we create a cyclic_iterator that 
+iterates repeatedly over [0 1 1 1 1 0]. Of course, we start traversing
+the grid at the second row and stop at the (N_y - 1)th row.
+

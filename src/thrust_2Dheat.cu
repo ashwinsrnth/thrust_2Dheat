@@ -44,7 +44,6 @@ public:
 };
 
 
-
 int main(){
 
     double  dx = (double)L_x/N_x,
@@ -57,22 +56,22 @@ int main(){
     clock_t startclock, stopclock;
     double timeperstep;
 
-    thrust::device_vector<double> A= init_temp(N_x, N_y);
+    // Initialise temperatures in device memory (init.cu)
+    thrust::device_vector<double> A = init_temp(N_x, N_y);
 
+    // Create iterator for stencil which describes the boundaries (see README)
     thrust::device_vector<int> stencil(N_x, 1);
-    std::cout<<typeid(stencil).name()<<std::endl;
     stencil[0] = 0; stencil[N_x-1] = 0;
 
-    // Create stencil iterators
     typedef thrust::device_vector<int>::iterator IntIterator;
     typedef thrust::device_vector<double>::iterator DoubleIterator;
     typedef tiled_range<IntIterator> StencilIterator;
 
     StencilIterator repeated_stencil(stencil.begin(), stencil.end(), N_x-1);
 
+    // Temperature update loop:
     startclock = clock();
-
-    // Update temperatures 
+    
     for(int t=0; t<nsteps; t+=dt){
         DoubleIterator s1 = A.begin()+N_y;
         DoubleIterator s2 = A.begin()+N_y - N_y;
@@ -92,15 +91,16 @@ int main(){
                         temperature_update_functor(dx, dy, dt, alpha));
         
     }
-
     stopclock = clock();
+    
+    // Calculate time per point per step:
     timeperstep =((double)(stopclock-startclock))/CLOCKS_PER_SEC;
     timeperstep = timeperstep / nsteps;
     timeperstep = timeperstep / (N_x*N_y);
 
     printf("Time per point per step = %e\n",timeperstep);
 
-
+    // Copy results to host and write to file:
     thrust::host_vector<double> A_h = A;
     write_to_file(A_h.data(), N_y, N_x);
 
