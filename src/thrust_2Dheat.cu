@@ -9,6 +9,7 @@
 #include <thrust/device_ptr.h>
 #include <thrust/host_vector.h>
 
+#include <stdlib.h>
 #include <iomanip>
 #include <typeinfo>
 #include <time.h>
@@ -51,8 +52,8 @@ int main(int argc, char* argv[]){
     // then taken from definition above.
 
     if (argc == 3){             // Override definitions for N_x, N_y
-        double N_x = argv[1];
-        double N_y = argv[2];
+        double N_x = atof(argv[1]);
+        double N_y = atof(argv[2]);
     }
 
     double  dx = (double)L_x/N_x,
