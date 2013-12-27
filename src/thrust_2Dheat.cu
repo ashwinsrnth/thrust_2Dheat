@@ -17,8 +17,8 @@
 #include <printmatrix.hpp>
 #include <init.cu>
 
-# define L_x 1
-# define L_y 1
+# define L_x 1024
+# define L_y 1024
 # define N_x 1024
 # define N_y 1024
 

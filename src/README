@@ -4,9 +4,9 @@ Files:
 thrust_2Dheat.cu    :   Finite difference solution to the 2-D heat conduction 
                         equation using Thrust.
 
-cam_2Dheat.cu       :   CPU/CUDA implementation by many-core group.
-                        Included for comparison and validation.
-                        @ Cambridge University. 
+cam_2Dheat.cu       :   CPU/CUDA implementation by many-core group 
+                        @ Cambridge University. Included for comparison 
+                        and validation.
 
                         Website: http://www.many-core.group.cam.ac.uk/
 

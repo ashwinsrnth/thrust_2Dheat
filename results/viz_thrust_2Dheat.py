@@ -1,16 +1,16 @@
+    import string
 from pylab import *
 
-A = fromfile('out.dat', sep = " ")
-A = array(A)
+f = open('output.txt')
+T = f.read()
 
-m = A[0]; n = A[1]
+m = 1024
+n = 1024
 
-A = reshape(A[2:], [m, n])
-
-
-
+T = fromstring(T, sep=', ')
+T = reshape(T, [m, n])
 
 x, y = meshgrid(linspace(0, 1, m), linspace(0, 1, n))
-contourf(x, y, A)
+contourf(x, y, T)
 colorbar()
 show()
