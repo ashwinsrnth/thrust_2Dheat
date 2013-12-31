@@ -1,6 +1,6 @@
 from pylab import *
 
-A = fromfile('out.dat', sep = " ")
+A = fromfile('final.dat', sep = " ")
 A = array(A)
 
 m = A[0]; n = A[1]

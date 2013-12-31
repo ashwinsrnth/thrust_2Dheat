@@ -233,8 +233,8 @@ int main(int argc, char *argv[])
     nstep = 10000;
 
     if (argc == 3){             // Override definitions for N_x, N_y
-        double ni = atof(argv[1]);
-        double nj = atof(argv[2]);
+        ni = atof(argv[1]);
+        nj = atof(argv[2]);
     }
 
     // allocate temperature array on host

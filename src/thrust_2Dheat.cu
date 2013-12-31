@@ -52,8 +52,10 @@ int main(int argc, char* argv[]){
     // then taken from definition above.
 
     if (argc == 3){             // Override definitions for N_x, N_y
-        double N_x = atof(argv[1]);
-        double N_y = atof(argv[2]);
+        N_x = atof(argv[1]);
+        N_y = atof(argv[2]);
+        L_x = N_x;
+        L_y = N_y;
     }
 
     double  dx = (double)L_x/N_x,
@@ -77,7 +79,7 @@ int main(int argc, char* argv[]){
     typedef thrust::device_vector<double>::iterator DoubleIterator;
     typedef tiled_range<IntIterator> StencilIterator;
 
-    StencilIterator repeated_stencil(stencil.begin(), stencil.end(), N_x-1);
+    StencilIterator repeated_stencil(stencil.begin(), stencil.end(), N_y-1);
 
     // Temperature update loop:
     startclock = clock();
