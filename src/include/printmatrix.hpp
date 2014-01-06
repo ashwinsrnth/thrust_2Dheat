@@ -16,6 +16,27 @@ void printmatrix (Type& A, int N_i, int N_j){
     std::cout << std::endl;
 } 
 
+
+
+template <typename Type>
+void printmatrix (Type& A, int N_i, int N_j, N_k){
+    for (int k = 0; k<N_k; k++){
+        for(int i=0; i<N_i; i++){
+            std::cout << std::endl;
+            for(int j=0; j<N_j; j++){
+                int idx = TO1D(i, j, N_j);
+                idx += k*N_i*N_j
+                std::cout << std::setw(8) << A[idx];
+            }
+        }
+    std::cout<< std::endl <<std::endl;
+    }
+    std::cout << std::endl;
+}
+
+
+
+
 template <typename T>
 void write_to_file(T* ary, int m, int n){
     int i, j;

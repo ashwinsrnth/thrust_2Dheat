@@ -1,3 +1,16 @@
+
+
+/**
+    thrust_2Dheat.cu
+    ----------------
+
+    Thrust based GPU solver for the 2-D heat equation, solved
+    by explicit finite differences.
+
+    This program runs the simulation. The 
+    temperature_update_functor is defined here.
+**/
+
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/iterator/transform_iterator.h>
 #include <thrust/iterator/permutation_iterator.h>

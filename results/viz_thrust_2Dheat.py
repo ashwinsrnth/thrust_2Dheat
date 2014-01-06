@@ -1,9 +1,12 @@
-    import string
+import string
 from pylab import *
 
+# File to write to
 f = open('output.txt')
 T = f.read()
+f.close()
 
+# Grid dimensions:
 m = 1024
 n = 1024
 

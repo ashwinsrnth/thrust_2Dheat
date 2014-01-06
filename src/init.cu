@@ -1,5 +1,22 @@
 
 thrust::device_vector<double> init_temp(int ni, int nj){
+
+    /**
+        Initial conditions for 2-D heat conduction problem. Dirichlet
+        only.
+
+        Parameters
+        ----------
+
+        int ni  -  Grid size in x- direction
+        int nj  -  Grid size in y- direction
+
+        Returns
+        ----------
+
+        thrust::device_vector of initial temperatures.
+
+    */
    
     float* temp1_h;
     int i, j, i2d, istep;
