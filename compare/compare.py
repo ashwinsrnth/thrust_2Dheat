@@ -25,5 +25,3 @@ with open('compare.txt', 'w') as f:
     for i in range(len(cam_times)):
         f.writelines([sizes[i], thrust_times[i], cam_times[i]])
 
-
-

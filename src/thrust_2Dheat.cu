@@ -26,33 +26,11 @@
 #include <iomanip>
 #include <typeinfo>
 #include <time.h>
+#include <stdio.h>
 
 #include <tiled.h>
-#include <printmatrix.hpp>
-#include <init.cu>
-
-
-struct temperature_update_functor{
-
-private:
-    double dx, dy, dt, alpha;
-
-public:
-    temperature_update_functor(double _dx, double _dy, 
-        double _dt, double _alpha) : dx(_dx), dy(_dy), dt(_dt), alpha(_alpha){}
-     
-    template <typename Tuple>
-    __host__ __device__
-    void operator() (Tuple t){  
-        if(thrust::get<5>(t)){
-            thrust::get<0>(t) += 
-            (alpha*dt)*
-            ((1/(dy*dy))*(thrust::get<1>(t)-2*thrust::get<0>(t)+thrust::get<4>(t))+
-            (1/(dx*dx))*(thrust::get<2>(t)-2*thrust::get<0>(t)+thrust::get<3>(t))); 
-        }
-    }
-};
-
+#include <init.h>
+#include <functors.h>
 
 int main(int argc, char* argv[]){
 
@@ -108,12 +86,20 @@ int main(int argc, char* argv[]){
                               DoubleIterator, DoubleIterator, 
                               StencilIterator::iterator > IteratorTuple;
         
-        thrust::zip_iterator<IteratorTuple> zip = 
-        make_zip_iterator(thrust::make_tuple(s1, s2, s3, s4, s5, 
-                                                repeated_stencil.begin()));
+        typedef thrust::tuple<DoubleIterator, DoubleIterator> DoubleTuple;
+        typedef thrust::zip_iterator<DoubleTuple> DoubleZipIterator;
+        typedef thrust::tuple<DoubleIterator, DoubleZipIterator, DoubleZipIterator,
+                              StencilIterator::iterator> StencilTuple;
+
+
+        thrust::zip_iterator<StencilTuple> zip =
+        make_zip_iterator(thrust::make_tuple(s1, 
+                          thrust::make_zip_iterator(make_tuple(s4, s5)),
+                          thrust::make_zip_iterator(make_tuple(s2, s3)),
+                          repeated_stencil.begin()));
 
         thrust::for_each(zip, zip+N_y*N_x-2*N_x, 
-                        temperature_update_functor(dx, dy, dt, alpha));
+                        temperature_update_functor2(dx, dy, dt, alpha));
         
     }
     stopclock = clock();
@@ -124,11 +110,11 @@ int main(int argc, char* argv[]){
     timeperstep = timeperstep / (N_x*N_y);
 
     printf("Time per point per step = %e\n",timeperstep);
-
+    /*
     // Copy results to host and write to file:
     thrust::host_vector<double> A_h = A;
     write_to_file(A_h.data(), N_y, N_x);
-
+    */
     return 0;
 }
 
