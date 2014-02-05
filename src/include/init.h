@@ -1,5 +1,5 @@
 
-thrust::device_vector<double> init_temp(int ni, int nj){
+thrust::device_vector<double> init_temp(double* temp1_h, int ni, int nj){
 
     /**
         Initial conditions for 2-D heat conduction problem. Dirichlet
@@ -18,12 +18,8 @@ thrust::device_vector<double> init_temp(int ni, int nj){
 
     */
    
-    float* temp1_h;
-    int i, j, i2d, istep;
-    float temp_bl, temp_br, temp_tl, temp_tr;
-
-
-    temp1_h = (float *)malloc(sizeof(float)*ni*nj);
+    int i, j, i2d;
+    double temp_bl, temp_br, temp_tl, temp_tr;
 
     // initial temperature in interior
     for (j=1; j < nj-1; j++) {
@@ -44,24 +40,24 @@ thrust::device_vector<double> init_temp(int ni, int nj){
         // bottom
         j = 0;
         i2d = i + ni*j;
-        temp1_h[i2d] = temp_bl + (temp_br-temp_bl)*(float)i/(float)(ni-1);
+        temp1_h[i2d] = temp_bl + (temp_br-temp_bl)*(double)i/(double)(ni-1);
 
         // top
         j = nj-1;
         i2d = i + ni*j;
-        temp1_h[i2d] = temp_tl + (temp_tr-temp_tl)*(float)i/(float)(ni-1);
+        temp1_h[i2d] = temp_tl + (temp_tr-temp_tl)*(double)i/(double)(ni-1);
     }
 
     for (j=0; j < nj; j++) {
         // left
         i = 0;
         i2d = i + ni*j;
-        temp1_h[i2d] = temp_bl + (temp_tl-temp_bl)*(float)j/(float)(nj-1);
+        temp1_h[i2d] = temp_bl + (temp_tl-temp_bl)*(double)j/(double)(nj-1);
 
         // right
         i = ni-1;
         i2d = i + ni*j;
-        temp1_h[i2d] = temp_br + (temp_tr-temp_br)*(float)j/(float)(nj-1);
+        temp1_h[i2d] = temp_br + (temp_tr-temp_br)*(double)j/(double)(nj-1);
     }
 
     thrust::device_vector<double> D(temp1_h, temp1_h + ni*nj);

@@ -31,6 +31,7 @@
 #include <tiled.h>
 #include <init.h>
 #include <functors.h>
+#include <printmatrix.hpp>
 
 int main(int argc, char* argv[]){
 
@@ -51,16 +52,18 @@ int main(int argc, char* argv[]){
 
     double  dx = (double)L_x/N_x,
             dy = (double)L_y/N_y,
-            alpha = 0.2,
+            alpha = 0.02,
             dt = 1;
 
-    int nsteps = 10000;
+    int nsteps = 100;
 
     clock_t startclock, stopclock;
     double timeperstep;
 
-    // Initialise temperatures in device memory (init.cu)
-    thrust::device_vector<double> A = init_temp(N_x, N_y);
+    // Initialise temperatures in host memory (init.cu)
+    thrust::host_vector<double> A_h(N_x*N_y);
+    init_temp(thrust::raw_pointer_cast(A_h.data()), N_x, N_y);
+    thrust::device_vector<double> A(A_h.begin(), A_h.end());
 
     // Create iterator for stencil which describes the boundaries (see README)
     thrust::device_vector<int> stencil(N_x, 1);
@@ -69,6 +72,14 @@ int main(int argc, char* argv[]){
     typedef thrust::device_vector<int>::iterator IntIterator;
     typedef thrust::device_vector<double>::iterator DoubleIterator;
     typedef tiled_range<IntIterator> StencilIterator;
+    typedef thrust::tuple<DoubleIterator, DoubleIterator, DoubleIterator, 
+                          DoubleIterator, DoubleIterator, 
+                          StencilIterator::iterator > IteratorTuple;
+    
+    typedef thrust::tuple<DoubleIterator, DoubleIterator> DoubleTuple;
+    typedef thrust::zip_iterator<DoubleTuple> DoubleZipIterator;
+    typedef thrust::tuple<DoubleIterator, DoubleZipIterator, DoubleZipIterator,
+                          StencilIterator::iterator> StencilTuple;
 
     StencilIterator repeated_stencil(stencil.begin(), stencil.end(), N_y-1);
 
@@ -82,20 +93,10 @@ int main(int argc, char* argv[]){
         DoubleIterator s4 = A.begin()+N_x + 1;
         DoubleIterator s5 = A.begin()+N_x + N_x;
 
-        typedef thrust::tuple<DoubleIterator, DoubleIterator, DoubleIterator, 
-                              DoubleIterator, DoubleIterator, 
-                              StencilIterator::iterator > IteratorTuple;
-        
-        typedef thrust::tuple<DoubleIterator, DoubleIterator> DoubleTuple;
-        typedef thrust::zip_iterator<DoubleTuple> DoubleZipIterator;
-        typedef thrust::tuple<DoubleIterator, DoubleZipIterator, DoubleZipIterator,
-                              StencilIterator::iterator> StencilTuple;
-
-
         thrust::zip_iterator<StencilTuple> zip =
         make_zip_iterator(thrust::make_tuple(s1, 
-                          thrust::make_zip_iterator(make_tuple(s4, s5)),
-                          thrust::make_zip_iterator(make_tuple(s2, s3)),
+                          thrust::make_zip_iterator(make_tuple(s3, s4)),
+                          thrust::make_zip_iterator(make_tuple(s2, s5)),
                           repeated_stencil.begin()));
 
         thrust::for_each(zip, zip+N_y*N_x-2*N_x, 
@@ -110,11 +111,10 @@ int main(int argc, char* argv[]){
     timeperstep = timeperstep / (N_x*N_y);
 
     printf("Time per point per step = %e\n",timeperstep);
-    /*
+    
     // Copy results to host and write to file:
-    thrust::host_vector<double> A_h = A;
+    A_h = A;
     write_to_file(A_h.data(), N_y, N_x);
-    */
     return 0;
 }
 

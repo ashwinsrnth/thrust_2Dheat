@@ -10,4 +10,4 @@ cam : obj/cam_2Dheat.o
 	nvcc -o bin/cam_2Dheat.bin obj/cam_2Dheat.o
 
 obj/cam_2Dheat.o : compare/cam_2Dheat.cu
-	nvcc -arch=sm_20 -o obj/cam_2Dheat.o -c src/cam_2Dheat.cu
+	nvcc -arch=sm_20 -o obj/cam_2Dheat.o -c compare/cam_2Dheat.cu

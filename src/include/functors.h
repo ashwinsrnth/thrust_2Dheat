@@ -38,9 +38,13 @@ public:
             thrust::get<0>(t) +=
             (alpha*dt)*
             ((1/dx*dx)*
-                (thrust::get<0>(thrust::get<1>(t)) + thrust::get<1>(thrust::get<1>(t)))+
+                (thrust::get<0>(thrust::get<1>(t)) 
+              -2*thrust::get<0>(t)
+               + thrust::get<1>(thrust::get<1>(t))) +
              (1/dy*dy)*
-                (thrust::get<0>(thrust::get<2>(t)) + thrust::get<1>(thrust::get<2>(t))));
+                (thrust::get<0>(thrust::get<2>(t))
+              -2*thrust::get<0>(t)
+               + thrust::get<1>(thrust::get<2>(t))));
         }
     }
 };
